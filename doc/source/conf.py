@@ -50,7 +50,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
-              'oslosphinx',
+              'oslo.sphinx',
               # NOTE(dstanek): Uncomment the [pbr] section in setup.cfg and
               # remove this Sphinx extension when
               # https://launchpad.net/bugs/1260495 is fixed.
