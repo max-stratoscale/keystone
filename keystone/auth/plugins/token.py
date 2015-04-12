@@ -33,6 +33,8 @@ class Token(auth.AuthMethodHandler):
             if 'id' not in auth_payload:
                 raise exception.ValidationError(attribute='id',
                                                 target=self.method)
+            refresh = auth_payload.get('refresh', False)
+
             token_id = auth_payload['id']
             response = self.token_provider_api.validate_token(token_id)
             token_ref = token_model.KeystoneToken(token_id=token_id,
@@ -60,7 +62,12 @@ class Token(auth.AuthMethodHandler):
                 # issued prior to audit id existing, the chain is not tracked.
                 token_audit_id = None
 
-            user_context.setdefault('expires_at', token_ref.expires)
+            if not refresh:
+                expires = token_ref.expires
+            else:
+                expires = None
+
+            user_context.setdefault('expires_at', expires)
             user_context['audit_id'] = token_audit_id
             user_context.setdefault('user_id', token_ref.user_id)
             # TODO(morganfainberg: determine if token 'extras' can be removed
