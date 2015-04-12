@@ -35,6 +35,8 @@ class Token(auth.AuthMethodHandler):
             if 'id' not in auth_payload:
                 raise exception.ValidationError(attribute='id',
                                                 target=self.method)
+            refresh = auth_payload.get('refresh', False)
+
             token_id = auth_payload['id']
             response = self.provider.validate_token(token_id)
             #for V3 tokens, the essential data is under  the 'token' value.
@@ -60,12 +62,16 @@ class Token(auth.AuthMethodHandler):
             #time of an old token, otherwise, they could be extened
             #forever.   The expiration value was stored at different
             #locations in v2 and v3 tokens.
-            expires_at = token_ref.get('expires_at')
-            if not expires_at:
-                expires_at = token_ref.get('expires')
-            if not expires_at:
-                expires_at = timeutils.normalize_time(
-                    timeutils.parse_isotime(token_ref['token']['expires']))
+            if not refresh:
+                expires_at = token_ref.get('expires_at')
+                if not expires_at:
+                    expires_at = token_ref.get('expires')
+                if not expires_at:
+                    expires_at = timeutils.normalize_time(
+                        timeutils.parse_isotime(token_ref['token']['expires']))
+
+            else:
+                expires_at = None
 
             user_context.setdefault('expires_at', expires_at)
             user_context.setdefault('user_id', token_ref['user']['id'])
